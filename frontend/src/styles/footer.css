@@ -1,0 +1,29 @@
+@import "./app.css";
+
+@layer components {
+  /* Footer - BEM Block */
+  .footer {
+    @apply border-t border-border bg-transparent;
+  }
+
+  /* Footer - BEM Elements */
+  .footer__container {
+    @apply flex flex-col justify-center h-15;
+  }
+
+  .footer__content {
+    @apply flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0;
+  }
+
+  .footer__copyright {
+    @apply text-xs text-muted-foreground;
+  }
+
+  .footer__links {
+    @apply flex gap-6 text-xs;
+  }
+
+  .footer__link {
+    @apply text-muted-foreground hover:text-primary transition-colors;
+  }
+}

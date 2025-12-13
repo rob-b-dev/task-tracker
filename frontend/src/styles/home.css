@@ -1,0 +1,12 @@
+@import "./app.css";
+
+@layer components {
+  /* Card - BEM Modifier for feature variant (reusable on home page) */
+  .card--feature {
+    @apply bg-card border border-card-border rounded-xl px-6 py-5 flex flex-col gap-5 justify-center transition-all duration-300 shadow-sm;
+  }
+
+  .card--feature:hover {
+    @apply -translate-y-1 bg-[oklch(70%_0.12_245/0.12)] border-[oklch(52%_0.20_245/0.3)] shadow-md;
+  }
+}

@@ -1,0 +1,13 @@
+@import "./app.css";
+
+@layer components {
+  /* Nav Link */
+  .nav-link {
+    @apply text-foreground text-sm transition-colors duration-200 hover:text-primary;
+  }
+
+  /* Nav Link Active State */
+  .nav-link.active {
+    @apply text-primary font-semibold;
+  }
+}

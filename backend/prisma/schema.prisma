@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  status      String    @default("pending") // pending, in-progress, completed
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tags        TaskTag[]
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  color     String?
+  createdAt DateTime  @default(now())
+  tasks     TaskTag[]
+}
+
+model TaskTag {
+  taskId String
+  tagId  String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+}

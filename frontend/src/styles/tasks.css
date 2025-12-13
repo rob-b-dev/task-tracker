@@ -1,0 +1,30 @@
+@import "./app.css";
+
+@layer components {
+  /* Task Card - BEM Block (reusable component) */
+  .task-card {
+    @apply bg-card border border-card-border rounded-xl p-5 transition-all flex flex-col h-full;
+  }
+
+  .task-card:hover {
+    @apply shadow-md -translate-y-0.5;
+  }
+
+  /* Badge - BEM Block */
+  .badge {
+    @apply px-2.5 py-0.5 rounded-md text-xs font-medium capitalize;
+  }
+
+  /* Badge - BEM Modifiers for status */
+  .badge--pending {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .badge--in-progress {
+    @apply bg-yellow-100 text-yellow-700;
+  }
+
+  .badge--completed {
+    @apply bg-green-100 text-green-700;
+  }
+}
