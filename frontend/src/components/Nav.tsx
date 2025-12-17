@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
-function Nav() {
+export default function Nav() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -45,28 +45,15 @@ function Nav() {
                   Tasks
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/create"
-                  className={`nav-link ${
-                    location.pathname === "/create" ? "active" : ""
-                  }`}
-                  aria-current={
-                    location.pathname === "/create" ? "page" : undefined
-                  }
-                >
-                  Create Task
-                </Link>
-              </li>
             </ul>
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden xl:flex items-center gap-3 ml-auto">
-            <button className="px-4 py-2 rounded-lg font-medium text-[0.8125rem] transition-all duration-200 text-foreground border border-border hover:text-primary hover:border-primary/30 hover:-translate-y-px">
+          <div className="hidden xl:flex gap-3 items-center ml-auto">
+            <button className="px-4 py-2 rounded-lg btn btn-secondary text-foreground border border-border hover:text-primary hover:border-primary/30">
               Login
             </button>
-            <button className="px-4 py-2 rounded-lg font-medium text-[0.8125rem] transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary-hover hover:-translate-y-px">
+            <button className="px-4 py-2 rounded-lg btn btn-primary bg-primary text-primary-foreground hover:bg-primary-hover">
               Sign Up
             </button>
           </div>
@@ -129,22 +116,11 @@ function Nav() {
             >
               Tasks
             </Link>
-            <Link
-              to="/create"
-              className={`nav-link block py-2 px-4 rounded-lg transition-colors ${
-                location.pathname === "/create"
-                  ? "active bg-muted"
-                  : "hover:bg-background"
-              }`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Create Task
-            </Link>
             <div className="flex flex-col gap-2 pt-2 mt-2 border-t border-border">
-              <button className="px-4 py-2 rounded-lg font-medium text-[0.8125rem] transition-all duration-200 text-foreground border border-border hover:text-primary hover:border-primary/30 hover:-translate-y-px w-full">
+              <button className="px-4 py-2 rounded-lg transition-all duration-200 text-foreground border border-border hover:text-primary hover:border-primary/30 hover:-translate-y-px w-full">
                 Login
               </button>
-              <button className="px-4 py-2 rounded-lg font-medium text-[0.8125rem] transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary-hover hover:-translate-y-px w-full">
+              <button className="px-4 py-2 rounded-lg transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary-hover hover:-translate-y-px w-full">
                 Sign Up
               </button>
             </div>
@@ -154,5 +130,3 @@ function Nav() {
     </nav>
   );
 }
-
-export default Nav;

@@ -3,28 +3,28 @@
 @layer components {
   /* Task Card - BEM Block (reusable component) */
   .task-card {
-    @apply bg-card border border-card-border rounded-xl p-5 transition-all flex flex-col h-full;
+    @apply bg-card border border-card-border rounded-xl p-5 transition-shadow duration-200 flex flex-col h-full;
   }
 
   .task-card:hover {
-    @apply shadow-md -translate-y-0.5;
+    @apply shadow-md;
   }
 
   /* Badge - BEM Block */
   .badge {
-    @apply px-2.5 py-0.5 rounded-md text-xs font-medium capitalize;
+    @apply inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider;
   }
 
   /* Badge - BEM Modifiers for status */
   .badge--pending {
-    @apply bg-blue-100 text-blue-700;
+    @apply bg-blue-600 text-white;
   }
 
   .badge--in-progress {
-    @apply bg-yellow-100 text-yellow-700;
+    @apply bg-yellow-500 text-white;
   }
 
   .badge--completed {
-    @apply bg-green-100 text-green-700;
+    @apply bg-green-600 text-white;
   }
 }

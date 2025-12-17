@@ -104,24 +104,16 @@
 
   /* Card */
   .card {
-    @apply bg-card border border-card-border rounded-xl p-6 flex flex-col gap-3 wrap-break-word shadow-sm transition-all duration-200;
+    @apply bg-card border border-card-border rounded-xl p-6 flex flex-col gap-3 shadow-sm transition-shadow duration-200;
   }
 
   .card:hover {
-    @apply border-[#cbd5e1] shadow-md -translate-y-0.5;
+    @apply shadow-md;
   }
 
   /* Button - BEM Block */
   .btn {
-    @apply flex items-center justify-center px-5 py-3 rounded-xl font-medium text-sm transition-all shadow-sm;
-  }
-
-  .btn:hover {
-    @apply -translate-y-px shadow-md;
-  }
-
-  .btn:active {
-    @apply translate-y-0;
+    @apply flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-colors duration-200 shadow-sm;
   }
 
   /* Button - BEM Modifiers */
@@ -131,10 +123,6 @@
 
   .btn--secondary {
     @apply bg-secondary text-secondary-foreground border border-border hover:bg-secondary-hover;
-  }
-
-  .btn--delete {
-    @apply px-2.5 py-0.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /* Input - BEM Block */

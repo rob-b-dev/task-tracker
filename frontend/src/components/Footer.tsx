@@ -1,6 +1,6 @@
 import "../styles/footer.css";
 
-function Footer() {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -27,5 +27,3 @@ function Footer() {
     </footer>
   );
 }
-
-export default Footer;
