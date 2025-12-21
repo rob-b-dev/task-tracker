@@ -85,9 +85,9 @@ export default function Home() {
       {/* FEATURES SECTION */}
       <section
         id="features"
-        className="min-h-full snap-section flex items-center py-12"
+        className="min-h-full snap-section flex items-center"
       >
-        <div className="w-full">
+        <div className="w-full py-12">
           <div className="mb-12">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-linear-to-r from-[oklch(25%_0.10_245)] to-[oklch(65%_0.18_245)] bg-clip-text text-transparent mb-6">
               Why Choose Task Tracker?
