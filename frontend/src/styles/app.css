@@ -1,105 +1,42 @@
-@import "tailwindcss";
-
-:root {
-  /* Colors - Modern oklch blue palette */
-  --color-background: oklch(70% 0.12 245 / 0.08);
-  --color-foreground: oklch(25% 0.015 264);
-  --color-muted: oklch(94% 0.006 264);
-  --color-muted-foreground: oklch(55% 0.012 264);
-  --color-border: oklch(90% 0.008 264);
-  
-  --color-primary: oklch(52% 0.20 245);
-  --color-primary-foreground: oklch(100% 0 0);
-  --color-primary-hover: oklch(48% 0.21 245);
-  --color-primary-active: oklch(70% 0.16 245);
-  
-  --color-secondary: oklch(100% 0 0);
-  --color-secondary-foreground: oklch(30% 0.015 264);
-  --color-secondary-hover: oklch(97% 0.003 264);
-  
-  --color-card: oklch(100% 0 0);
-  --color-card-border: oklch(90% 0.008 264);
-
-  /* Font Family */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-
-  /* Typography - responsive scaling */
-  --font-xs: clamp(0.7rem, 0.6rem + 0.5vw, 0.875rem);
-  --font-sm: clamp(0.8rem, 0.7rem + 0.5vw, 1rem);
-  --font-base: clamp(0.9rem, 0.7rem + 0.5vw, 1.125rem);
-  --font-lg: clamp(1rem, 0.85rem + 0.75vw, 1.25rem);
-  --font-xl: clamp(1.1rem, 0.9rem + 1vw, 1.5rem);
-  --font-2xl: clamp(1.25rem, 1rem + 1.25vw, 1.875rem);
-  --font-3xl: clamp(1.5rem, 1.1rem + 2vw, 2.25rem);
-  --font-4xl: clamp(1.75rem, 1.25rem + 2.5vw, 3rem);
-  --font-5xl: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
-}
-
-@theme {
-  /* Colors */
-  --color-background: var(--color-background);
-  --color-foreground: var(--color-foreground);
-  --color-muted: var(--color-muted);
-  --color-muted-foreground: var(--color-muted-foreground);
-  --color-border: var(--color-border);
-  
-  --color-primary: var(--color-primary);
-  --color-primary-foreground: var(--color-primary-foreground);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-active: var(--color-primary-active);
-  
-  --color-secondary: var(--color-secondary);
-  --color-secondary-foreground: var(--color-secondary-foreground);
-  --color-secondary-hover: var(--color-secondary-hover);
-  
-  --color-card: var(--color-card);
-  --color-card-border: var(--color-card-border);
-
-  /* Typography */
-  --text-xs: var(--font-xs);
-  --text-sm: var(--font-sm);
-  --text-base: var(--font-base);
-  --text-lg: var(--font-lg);
-  --text-xl: var(--font-xl);
-  --text-2xl: var(--font-2xl);
-  --text-3xl: var(--font-3xl);
-  --text-4xl: var(--font-4xl);
-  --text-5xl: var(--font-5xl);
-}
+@import "./index.css";
 
 @layer base {
-  * {
-    @apply box-border;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+  footer {
+    scroll-snap-align: none;
   }
 
-  body {
-    @apply bg-background text-foreground text-base leading-relaxed tracking-[-0.011em] font-(--font-sans);
+  /* Smooth scroll snap sections */
+  .snap-section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
-
-  /* Headings */
-  h1 { @apply font-bold text-3xl md:text-4xl; }
-  h2 { @apply font-semibold text-lg md:text-xl; }
-  h3 { @apply font-semibold text-base md:text-lg; }
-  h4 { @apply font-medium text-base; }
-  h5 { @apply font-medium text-sm; }
-  h6 { @apply font-medium text-xs; }
 }
 
 @layer components {
   /* Container to set width and padding */
   .main-container {
-    @apply w-full md:w-4/5 lg:w-3/5 px-4 md:px-6 lg:px-8 mx-auto;
+    @apply w-full max-w-[90%] lg:max-w-[80%] px-4 md:px-6 lg:px-8 mx-auto;
   }
 
-  .page-container {
-    @apply min-h-[calc(100vh-154px)] flex flex-col items-center py-8 md:py-10 lg:py-12;
-  }
-
-  /* Form */
+  /* Form Container - Reusable form wrapper */
   .form-container {
-    @apply bg-[oklch(98%_0.005_245)] border-border;
+    @apply bg-card border border-card-border rounded-xl p-6 max-w-2xl w-full shadow-xl;
+  }
+
+  .form-container__title {
+    @apply text-xl font-semibold mb-6;
+  }
+
+  .form-container__form {
+    @apply space-y-4;
+  }
+
+  .form-container__label {
+    @apply block text-sm font-medium text-foreground mb-2;
+  }
+
+  .form-container__actions {
+    @apply flex gap-3 justify-end pt-4 mt-2 border-t border-border;
   }
 
   /* Card */
@@ -113,7 +50,12 @@
 
   /* Button - BEM Block */
   .btn {
-    @apply flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-colors duration-200 shadow-sm;
+    @apply flex items-center justify-center
+      px-5 py-3
+      rounded-xl
+      font-medium text-sm
+      transition-colors duration-200
+      border border-border;
   }
 
   /* Button - BEM Modifiers */
@@ -122,7 +64,8 @@
   }
 
   .btn--secondary {
-    @apply bg-secondary text-secondary-foreground border border-border hover:bg-secondary-hover;
+    @apply bg-white text-gray-900 border border-gray-300 shadow-sm rounded-xl font-medium text-base px-6 py-2 transition-colors duration-150 hover:bg-gray-50 hover:border-gray-400;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.07);
   }
 
   /* Input - BEM Block */
@@ -141,5 +84,123 @@
   .tag {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-medium border transition-all;
     border-color: currentColor;
+  }
+
+  /* Task Card - Reusable component */
+  .task-card {
+    @apply bg-card border border-card-border rounded-xl p-5 transition-shadow duration-200 flex flex-col h-full;
+  }
+
+  .task-card:hover {
+    @apply shadow-md;
+  }
+
+  /* Badge - Status indicators */
+  .badge {
+    @apply inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider;
+  }
+
+  .badge--pending {
+    @apply bg-blue-600 text-white;
+  }
+
+  .badge--in-progress {
+    @apply bg-yellow-500 text-white;
+  }
+
+  .badge--completed {
+    @apply bg-green-600 text-white;
+  }
+
+  /* Card Feature Variant - Home page */
+  .card--feature {
+    @apply bg-card border border-card-border rounded-xl w-full px-3 py-3 flex flex-col gap-1 justify-center transition-all duration-100 shadow-sm;
+    min-height: 120px;
+    max-width: 100%;
+  }
+
+  .card--feature:hover {
+    @apply bg-[oklch(85%_0.16_245/0.25)] border-primary/40 shadow-lg;
+    transition-delay: 0ms;
+  }
+
+  @media (min-width: 768px) {
+    .card--feature {
+      @apply px-4 py-4;
+      min-height: 120px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .card--feature {
+      @apply px-5 py-5;
+      min-height: 120px;
+    }
+  }
+
+  /* Navigation Links */
+  .nav-link {
+    @apply text-foreground text-sm transition-colors duration-200 hover:text-primary;
+  }
+
+  .nav-link.active {
+    @apply text-primary font-semibold;
+  }
+
+  .nav-action {
+    @apply hidden xl:flex gap-3 items-center ml-auto;
+  }
+
+  .nav-action__mobile {
+    @apply flex flex-col gap-2 pt-2 mt-2 border-t border-border;
+  }
+
+  .nav-action__btn {
+    @apply px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium
+           bg-primary-foreground text-foreground border border-border
+           shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary/50
+           no-underline;
+  }
+
+  .nav-action__btn.active {
+    @apply bg-primary-foreground border-primary text-primary shadow-md;
+  }
+
+  /* Footer */
+  .footer {
+    @apply border-t border-border bg-transparent;
+    scroll-snap-align: unset;
+    margin-top: 0;
+    min-height: 61px;
+  }
+
+  .footer__container {
+    @apply flex flex-col justify-center h-15;
+  }
+
+  .footer__content {
+    @apply flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0;
+  }
+
+  .footer__copyright {
+    @apply text-xs text-muted-foreground;
+  }
+
+  .footer__links {
+    @apply flex gap-6 text-xs;
+  }
+
+  .footer__link {
+    @apply text-muted-foreground hover:text-primary transition-colors;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
   }
 }

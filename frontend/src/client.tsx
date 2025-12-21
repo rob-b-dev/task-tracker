@@ -1,37 +1,75 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// Context
+import { AuthProvider } from "./context/AuthContext";
 
 // Styles
+import "./styles/index.css";
 import "./styles/app.css";
-import "./styles/home.css";
-import "./styles/nav.css";
-import "./styles/tasks.css";
 
 // Components
-import Home from "./components/Home.tsx";
-import Nav from "./components/Nav.tsx";
-import ViewTasks from "./components/ViewTasks.tsx";
-import Footer from "./components/Footer.tsx";
+import Home from "./components/pages/Home";
+import Nav from "./components/layout/Nav";
+import TaskView from "./components/tasks/TaskView";
+import Footer from "./components/layout/Footer";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import Profile from "./components/pages/Profile";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* Apply col layout and height to app for footer presentation */}
-    <main className="flex flex-col min-h-screen">
-      <BrowserRouter>
-        <Nav />
-        {/* Establish global width/padding on main content */}
-        <div className="main-container">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/tasks" element={<ViewTasks />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
-      {/* Push footer to bottom after establishing app height and col layout */}
-      <div className="mt-auto">
+    <AuthProvider>
+      {/* App shell */}
+      <main className="flex flex-col h-screen">
+        <BrowserRouter>
+          {/* Fixed nav */}
+          <Nav />
+
+          {/* Content area - child inherits vh and prevent parent scrolling */}
+          <div className="main-container h-full overflow-hidden">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route
+                path="/tasks"
+                element={
+                  <ProtectedRoute>
+                    <TaskView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+        </BrowserRouter>
+
+        {/* Footer outside height calculation to  */}
         <Footer />
-      </div>
-    </main>
+      </main>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        draggable
+        pauseOnHover
+        limit={1}
+      />
+    </AuthProvider>
   </StrictMode>
 );

@@ -1,14 +1,20 @@
 import express from "express";
 import { prisma } from "../lib/prisma.js";
-import type { CreateTaskRequest, UpdateTaskRequest } from "../types/index.js";
 import { Request, Response } from "express";
+import type { CreateTaskRequest, UpdateTaskRequest } from "../types/index.js";
+import { authMiddleware } from "../middleware/auth.js";
 
+// Router instance
 const router = express.Router();
 
-// GET all tasks - returns Task[]
+// Apply auth middleware to all routes
+router.use(authMiddleware);
+
+// GET all tasks for the authenticated user - returns Task[]
 router.get("/", async (req: Request, res: Response) => {
   try {
     const tasks = await prisma.task.findMany({
+      where: { userId: req.userId },
       include: {
         tags: {
           include: {
@@ -37,10 +43,6 @@ router.post("/", async (req: Request, res: Response) => {
   try {
     const { title, description, status, tags } = req.body as CreateTaskRequest;
 
-    if (!title?.trim()) {
-      return res.status(400).json({ error: "Title is required" });
-    }
-
     // Remove duplicate tags by name
     const uniqueTags = tags?.length
       ? Array.from(new Map(tags.map((t) => [t.name.toLowerCase(), t])).values())
@@ -51,6 +53,7 @@ router.post("/", async (req: Request, res: Response) => {
         title: title.trim(),
         description: description?.trim() || null,
         status: status || "pending",
+        userId: req.userId!,
         tags: uniqueTags.length
           ? {
               create: uniqueTags.map((tag) => ({
@@ -94,11 +97,20 @@ router.put("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, description, status, tags } = req.body as UpdateTaskRequest;
 
-    // First, delete existing tag relations if tags are being updated
-    if (tags !== undefined) {
-      await prisma.taskTag.deleteMany({
-        where: { taskId: id },
-      });
+    // Validation
+    if (!title?.trim()) {
+      res.status(400).json({ error: "Title is required" });
+      return;
+    }
+
+    // Check if task belongs to user
+    const existingTask = await prisma.task.findFirst({
+      where: { id, userId: req.userId },
+    });
+
+    if (!existingTask) {
+      res.status(404).json({ error: "Task not found" });
+      return;
     }
 
     // Remove duplicate tags by name
@@ -106,29 +118,33 @@ router.put("/:id", async (req: Request, res: Response) => {
       ? Array.from(new Map(tags.map((t) => [t.name.toLowerCase(), t])).values())
       : [];
 
+    // Delete existing task-tag relationships
+    await prisma.taskTag.deleteMany({
+      where: { taskId: id },
+    });
+
+    // Update task with new data and tags
     const task = await prisma.task.update({
       where: { id },
       data: {
-        ...(title !== undefined && { title: title.trim() }),
-        ...(description !== undefined && {
-          description: description?.trim() || null,
-        }),
-        ...(status !== undefined && { status }),
-        ...(uniqueTags.length > 0 && {
-          tags: {
-            create: uniqueTags.map((tag) => ({
-              tag: {
-                connectOrCreate: {
-                  where: { name: tag.name },
-                  create: {
-                    name: tag.name,
-                    color: tag.color,
+        title: title.trim(),
+        description: description?.trim() || null,
+        status: status,
+        tags: uniqueTags.length
+          ? {
+              create: uniqueTags.map((tag) => ({
+                tag: {
+                  connectOrCreate: {
+                    where: { name: tag.name },
+                    create: {
+                      name: tag.name,
+                      color: tag.color,
+                    },
                   },
                 },
-              },
-            })),
-          },
-        }),
+              })),
+            }
+          : undefined,
       },
       include: {
         tags: {
@@ -157,6 +173,16 @@ router.delete(
   async (req: Request<{ id: string }, {}, {}>, res: Response) => {
     try {
       const { id } = req.params;
+
+      // Check if task belongs to user
+      const existingTask = await prisma.task.findFirst({
+        where: { id, userId: req.userId },
+      });
+
+      if (!existingTask) {
+        res.status(404).json({ error: "Task not found" });
+        return;
+      }
 
       await prisma.task.delete({
         where: { id },

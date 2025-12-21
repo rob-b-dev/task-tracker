@@ -1,15 +1,3 @@
-// Types for API requests
-
-export type CreateTaskRequest = {
-  title: string;
-  description?: string;
-  status?: string;
-  tags?: Array<{ name: string; color: string }>;
-};
-
-export type UpdateTaskRequest = {
-  title?: string;
-  description?: string;
-  status?: string;
-  tags?: Array<{ name: string; color: string }>;
-};
+// Barrel export - re-export all types from specific files
+export * from "./auth.types.js";
+export * from "./task.types.js";

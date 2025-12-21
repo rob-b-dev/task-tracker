@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Define models and client/db config
 
 generator client {
   provider = "prisma-client-js"
@@ -9,11 +8,24 @@ datasource db {
   provider = "sqlite"
 }
 
+// Tables for Users, Tasks, Tags, and TaskTags (many-to-many relationship)
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Task[]
+}
+
 model Task {
   id          String    @id @default(uuid())
   title       String
   description String?
   status      String    @default("pending") // pending, in-progress, completed
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   tags        TaskTag[]
