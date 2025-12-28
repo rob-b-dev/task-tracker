@@ -8,57 +8,68 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./context/AuthContext";
 
 // Styles
+import "./styles/reset.css";
 import "./styles/index.css";
 import "./styles/app.css";
 
 // Components
 import Home from "./components/pages/Home";
-import Nav from "./components/layout/Nav";
+import Layout from "./components/layout/Layout";
 import TaskView from "./components/tasks/TaskView";
-import Footer from "./components/layout/Footer";
-import Login from "./components/auth/Login";
-import Register from "./components/auth/Register";
+import Login from "./components/auth/components/Login";
+import Register from "./components/auth/components/Register";
 import Profile from "./components/pages/Profile";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+import NotFound from "./components/pages/NotFound";
+// Route Guards
+import ProtectedRoute from "./components/auth/routes/ProtectedRoute";
+import UnauthenticatedRoute from "./components/auth/routes/UnauthenticatedRoute";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
-      {/* App shell */}
-      <main className="flex flex-col h-screen">
-        <BrowserRouter>
-          {/* Fixed nav */}
-          <Nav />
+      <BrowserRouter>
+        <Routes>
+          {/* Routes with predefined layout */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/tasks"
+              element={
+                <ProtectedRoute>
+                  <TaskView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <UnauthenticatedRoute>
+                  <Login />
+                </UnauthenticatedRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <UnauthenticatedRoute>
+                  <Register />
+                </UnauthenticatedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
 
-          {/* Content area - child inherits vh and prevent parent scrolling */}
-          <div className="main-container h-full overflow-hidden">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route
-                path="/tasks"
-                element={
-                  <ProtectedRoute>
-                    <TaskView />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </div>
-        </BrowserRouter>
-
-        {/* Footer outside height calculation to  */}
-        <Footer />
-      </main>
+          {/* 404 route without layout */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
 
       <ToastContainer
         position="top-right"

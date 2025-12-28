@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -34,7 +34,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     // Only show toast notification if:
     // 1. Authentication check is complete (not loading)
     // 2. User is not authenticated
-    // 3. Toast hasn't been shown yet (prevents duplicates)
     // 4. User didn't just come from login or register pages
     // 5. User is not logging out (prevents duplicate toast with logout success message)
     if (

@@ -6,7 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 type ActiveTab = "info" | "password" | "danger";
 
 export default function Profile() {
-  const { user, logout, deleteAccount, token } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>("info");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -43,6 +43,7 @@ export default function Profile() {
   };
 
   // Check if profile info has changed and is valid
+  // useMemo to avoid unnecessary recalculations
   const isProfileChanged = useMemo(() => {
     return name !== user?.name || email !== user?.email;
   }, [name, email, user]);
@@ -94,15 +95,13 @@ export default function Profile() {
 
     try {
       // If email changed, check if it's already taken
-      if (email !== user?.email && token) {
+      if (email !== user?.email) {
         const checkResponse = await fetch(
           `http://localhost:3000/api/auth/check-email?email=${encodeURIComponent(
             email.trim().toLowerCase()
           )}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            credentials: "include", // Include cookies in request
           }
         );
 

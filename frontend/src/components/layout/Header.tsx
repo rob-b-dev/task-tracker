@@ -11,7 +11,7 @@ export default function Nav() {
 
   return (
     <nav className="sticky top-0 z-50 bg-card border-b border-border shadow-sm h-16">
-      <div className="main-container h-full flex">
+      <div className="content-container h-full flex">
         <div className="flex items-center justify-between w-full">
           {/* Logo */}
           <Link
@@ -127,7 +127,7 @@ export default function Nav() {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="xl:hidden absolute top-16 left-0 right-0 bg-card border-b border-border shadow-lg z-50">
-          <div className="main-container py-4 flex flex-col gap-2">
+          <div className="content-container py-4 flex flex-col gap-2">
             <Link
               to="/"
               className={`nav-link block py-2 px-4 rounded-lg transition-colors ${

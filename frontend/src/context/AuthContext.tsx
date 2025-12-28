@@ -18,7 +18,6 @@ import type {
  */
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   register: (credentials: RegisterRequest) => Promise<void>;
@@ -38,29 +37,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load authentication state from localStorage on component mount
+  // Check if user is authenticated on mount by calling /me endpoint
   useEffect(() => {
-    const storedToken = localStorage.getItem("authToken");
-    const storedUser = localStorage.getItem("authUser");
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/auth/me", {
+          credentials: "include", // Include cookies in request
+        });
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+        if (!response.ok) {
+          setUser(null);
+          return;
+        }
+
+        const userData = await response.json();
+        setUser(userData);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        // Don't clear user on network errors, only on explicit auth failures
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   /**
    * Login function
-   * Authenticates user and stores token/user data in state and localStorage
+   * Authenticates user and receives user data (token stored in HTTP-only cookie)
    */
   const login = async (credentials: LoginRequest) => {
     const response = await fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include cookies in request
       body: JSON.stringify(credentials),
     });
 
@@ -71,20 +84,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     const data: AuthResponse = await response.json();
     setUser(data.user);
-    setToken(data.token);
-    // Persist to localStorage for session persistence
-    localStorage.setItem("authToken", data.token);
-    localStorage.setItem("authUser", JSON.stringify(data.user));
   };
 
   /**
    * Register function
-   * Creates new user account and automatically logs them in
+   * Creates new user account and automatically logs them in (token stored in HTTP-only cookie)
    */
   const register = async (credentials: RegisterRequest) => {
     const response = await fetch("http://localhost:3000/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include cookies in request
       body: JSON.stringify(credentials),
     });
 
@@ -95,21 +105,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     const data: AuthResponse = await response.json();
     setUser(data.user);
-    setToken(data.token);
-    // Persist to localStorage for session persistence
-    localStorage.setItem("authToken", data.token);
-    localStorage.setItem("authUser", JSON.stringify(data.user));
   };
 
   /**
    * Logout function
-   * Clears user state and removes data from localStorage
+   * Clears user state (cookie cleared by setting maxAge to 0)
    */
   const logout = () => {
     setUser(null);
-    setToken(null);
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("authUser");
+    // Clear the cookie by making a request or setting it to expire
+    fetch("http://localhost:3000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    }).catch(console.error);
   };
 
   /**
@@ -117,13 +125,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
    * Permanently deletes user account and all associated data
    */
   const deleteAccount = async () => {
-    if (!token) throw new Error("Not authenticated");
-
     const response = await fetch("http://localhost:3000/api/auth/me", {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include", // Include cookies in request
     });
 
     if (!response.ok) {
@@ -139,8 +143,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     <AuthContext.Provider
       value={{
         user,
-        token,
-        isAuthenticated: !!user && !!token,
+        isAuthenticated: !!user,
         login,
         register,
         logout,

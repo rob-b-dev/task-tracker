@@ -46,47 +46,57 @@ router.get(
 );
 
 // POST - Register new user - accepts RegisterRequest, returns UserResponse
-router.post("/register", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { name, email, password } = req.body as RegisterRequest;
+router.post(
+  "/register",
+  async (
+    req: Request<{}, {}, RegisterRequest>,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { name, email, password } = req.body;
 
-    // Validation
-    if (!name || !email || !password) {
-      res.status(400).json({ error: "All fields are required" });
-      return;
+      // Validation
+      if (!name || !email || !password) {
+        res.status(400).json({ error: "All fields are required" });
+        return;
+      }
+
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email: email.trim().toLowerCase() },
+      });
+
+      if (existingUser) {
+        res.status(409).json({ error: "User already exists" });
+        return;
+      }
+
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password: hashedPassword,
+        },
+      });
+
+      // Respond with non-sensitive user data
+      res.status(201).json({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        } as UserResponse,
+      });
+    } catch (error) {
+      console.error("Error registering user:", error);
+      res.status(500).json({ error: "Failed to register user" });
     }
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: email.trim().toLowerCase() },
-    });
-
-    if (existingUser) {
-      res.status(409).json({ error: "User already exists" });
-      return;
-    }
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password: hashedPassword,
-      },
-    });
-
-    // Respond with non-sensitive user data
-    res.status(201).json({
-      user: { id: user.id, name: user.name, email: user.email } as UserResponse,
-    });
-  } catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).json({ error: "Failed to register user" });
   }
-});
+);
 
 export default router;

@@ -105,7 +105,7 @@ function TaskCard({ task, onView, onDelete }: TaskCardProps) {
 // ViewTasks is the stateful parent component
 // It owns task data, side effects, and business logic
 export default function ViewTasks() {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // Source of truth for tasks
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -119,23 +119,21 @@ export default function ViewTasks() {
 
   // Fetch tasks on initial render
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
-    apiFetchTasks(token)
+    apiFetchTasks()
       .then((data) => setTasks(data))
       .catch(() => setTasks([]))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [isAuthenticated]);
 
   // Handles both creating and updating tasks
   // Passed down to TaskModal as a prop
   const handleSave = async (taskData: Partial<Task> & { tags: Tag[] }) => {
-    if (!token) return;
-
     // Decide between create or update based on presence of id
     const saved = taskData.id
-      ? await updateTask(taskData.id, taskData, token)
-      : await createTask(taskData, token);
+      ? await updateTask(taskData.id, taskData)
+      : await createTask(taskData);
 
     // Update local state after persistence
     setTasks((t) =>
@@ -147,17 +145,38 @@ export default function ViewTasks() {
 
   // Deletes a task and updates state
   const handleDelete = async (id: string) => {
-    if (!token) return;
+    const sharedToastId = "task-delete";
 
-    const deletePromise = apiDeleteTask(id, token).then(() => {
+    try {
+      // Check if a delete toast is already active
+      if (!toast.isActive(sharedToastId)) {
+        // Create new loading toast if none exists
+        toast.loading("Deleting task...", { toastId: sharedToastId });
+      }
+
+      // Perform deletion
+      await apiDeleteTask(id);
+
+      // Update state
       setTasks((t) => t.filter((task) => task.id !== id));
-    });
 
-    toast.promise(deletePromise, {
-      pending: "Deleting task...",
-      success: "Task deleted successfully",
-      error: "Failed to delete task",
-    });
+      // Update the shared toast to success
+      toast.update(sharedToastId, {
+        render: "Task deleted successfully",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    } catch (error) {
+      // Update the shared toast to error
+      toast.update(sharedToastId, {
+        render: "Failed to delete task",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      console.error("Delete failed:", error);
+    }
   };
 
   // Memoized filtered task list based on search and status
@@ -179,7 +198,7 @@ export default function ViewTasks() {
   if (!tasks.length) {
     return (
       <div className="h-full flex items-center justify-center py-12">
-        <div className="text-center space-y-6 max-w-md">
+        <div className="text-center space-y-6">
           <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
             <FontAwesomeIcon
               icon={faClipboardList}
@@ -229,58 +248,56 @@ export default function ViewTasks() {
         />
       )}
 
-      <div className="py-12">
-        <div className="w-full">
-          {/* Header */}
-          <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-5 mb-6 flex items-center justify-between gap-4">
-            <div className="text-center flex-1">
-              <h2 className="text-xl font-bold text-foreground mb-1">
-                Stay Organized, Get More Done
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Manage your tasks efficiently with priorities and tags
-              </p>
-            </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="btn btn--primary shrink-0"
-            >
-              + New Task
-            </button>
+      <div className="max-w-[80%] mx-auto py-12">
+        {/* Header */}
+        <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-5 mb-6 flex items-center justify-between gap-4">
+          <div className="text-center flex-1">
+            <h2 className="text-xl font-bold text-foreground mb-1">
+              Stay Organized, Get More Done
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Manage your tasks efficiently with priorities and tags
+            </p>
           </div>
-
-          {/* Search and filters */}
-          <SearchBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
-            totalTasks={tasks.length}
-            filteredCount={filteredTasks.length}
-          />
-
-          {!filteredTasks.length ? (
-            <div className="text-center py-16 text-muted-foreground">
-              No tasks match your filters
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {filteredTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  // Open modal in edit mode
-                  onView={() => {
-                    setModalTask(task);
-                    setShowModal(true);
-                  }}
-                  // Trigger delete handler
-                  onDelete={() => handleDelete(task.id)}
-                />
-              ))}
-            </div>
-          )}
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn btn--primary shrink-0"
+          >
+            + New Task
+          </button>
         </div>
+
+        {/* Search and filters */}
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          totalTasks={tasks.length}
+          filteredCount={filteredTasks.length}
+        />
+
+        {!filteredTasks.length ? (
+          <div className="text-center py-16 text-muted-foreground">
+            No tasks match your filters
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filteredTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                // Open modal in edit mode
+                onView={() => {
+                  setModalTask(task);
+                  setShowModal(true);
+                }}
+                // Trigger delete handler
+                onDelete={() => handleDelete(task.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

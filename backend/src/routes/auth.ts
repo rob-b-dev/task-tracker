@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-import type { RegisterRequest, LoginRequest } from "../types/index.js";
+import type { RegisterRequest, LoginRequest } from "../types/auth.types.js";
 import { authMiddleware } from "../middleware/auth.js";
 
 // Router instance
@@ -77,13 +77,20 @@ router.post("/register", async (req: Request, res: Response) => {
       expiresIn: "7d",
     });
 
+    // Set HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(201).json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
       },
-      token,
     });
   } catch (error) {
     console.error("Error registering user:", error);
@@ -125,13 +132,20 @@ router.post("/login", async (req: Request, res: Response) => {
       expiresIn: "7d",
     });
 
+    // Set HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(200).json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
       },
-      token,
     });
   } catch (error) {
     console.error("Error logging in:", error);
@@ -165,6 +179,12 @@ router.get("/me", authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+// POST - Logout user (clear cookie)
+router.post("/logout", (_req: Request, res: Response) => {
+  res.clearCookie("token");
+  res.status(200).json({ message: "Logged out successfully" });
+});
+
 // DELETE - Delete user account (protected route)
 router.delete("/me", authMiddleware, async (req: Request, res: Response) => {
   try {
@@ -173,6 +193,8 @@ router.delete("/me", authMiddleware, async (req: Request, res: Response) => {
       where: { id: req.userId },
     });
 
+    // Clear cookie after deleting account
+    res.clearCookie("token");
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
     console.error("Error deleting user:", error);

@@ -1,6 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import type { UserId } from "../types/index.js";
+import type { UserId } from "../types/auth.types.js";
+
+/**
+ * JWT payload interface for proper typing
+ */
+interface JwtPayload {
+  userId: UserId;
+  iat?: number;
+  exp?: number;
+}
 
 /**
  * Extend Express Request interface to include userId property
@@ -18,9 +27,15 @@ declare global {
 const JWT_SECRET =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
+if (JWT_SECRET === "your-secret-key-change-in-production") {
+  console.warn(
+    "⚠️  Warning: Using default JWT_SECRET. Set JWT_SECRET in .env file for production!"
+  );
+}
+
 /**
  * Authentication middleware
- * Verifies JWT token from Authorization header and attaches userId to request
+ * Verifies JWT token from cookie and attaches userId to request
  *
  * @param req - Express request object
  * @param res - Express response object
@@ -32,19 +47,24 @@ export const authMiddleware = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    // Get token from cookie
+    const token = req.cookies.token;
 
-    // Check if Authorization header exists and has Bearer token
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // Check if token exists
+    if (!token) {
       res.status(401).json({ error: "No token provided" });
       return;
     }
 
-    // Extract token (remove "Bearer " prefix)
-    const token = authHeader.substring(7);
+    // Verify token and extract userId with proper typing
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
-    // Verify token and extract userId
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: UserId };
+    // Validate that userId exists in the decoded payload
+    if (!decoded.userId) {
+      res.status(401).json({ error: "Invalid token payload" });
+      return;
+    }
+
     req.userId = decoded.userId;
 
     // Proceed to next middleware/route handler

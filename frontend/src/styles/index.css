@@ -4,7 +4,7 @@
   /* Colors - Modern oklch blue palette */
   --color-background: #fff;
   --color-foreground: oklch(25% 0.015 264);
-  --color-muted: oklch(94% 0.006 264);
+  --color-muted: oklch(0.97 0.005 240);
   --color-muted-foreground: oklch(55% 0.012 264);
   --color-border: oklch(90% 0.008 264);
   
@@ -35,6 +35,7 @@
   --font-5xl: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
 }
 
+/* Custom tailwind theme tokens  */
 @theme {
   /* Colors */
   --color-background: var(--color-background);
@@ -69,25 +70,24 @@
 
 @layer base {
   * {
-    @apply box-border;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   html {
     scroll-padding-top: 0;
+    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground text-base leading-relaxed tracking-[-0.011em] font-(--font-sans);
-    scroll-behavior: smooth;
   }
 
   /* Headings */
-  h1 { @apply font-bold text-3xl md:text-4xl; }
-  h2 { @apply font-semibold text-lg md:text-xl; }
-  h3 { @apply font-semibold text-base md:text-lg; }
-  h4 { @apply font-medium text-base; }
-  h5 { @apply font-medium text-sm; }
-  h6 { @apply font-medium text-xs; }
+  h1 { @apply font-bold text-4xl md:text-5xl; }
+  h2 { @apply font-bold text-3xl md:text-4xl; }
+  h3 { @apply font-semibold text-2xl md:text-3xl; }
+  h4 { @apply font-semibold text-xl md:text-2xl; }
+  h5 { @apply font-medium text-lg; }
+  h6 { @apply font-medium text-base; }
 }

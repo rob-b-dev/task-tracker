@@ -2,36 +2,32 @@ import type { Task, Tag } from "../types";
 
 /**
  * Fetch all tasks for the authenticated user
- * @param token - JWT authentication token
  * @returns Promise resolving to array of tasks (reversed for newest first)
  */
-export const fetchTasks = async (token: string): Promise<Task[]> => {
+export const fetchTasks = async (): Promise<Task[]> => {
   const res = await fetch("http://localhost:3000/api/tasks", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    credentials: "include", // Include cookies in request
   });
   if (!res.ok) throw new Error("Failed to fetch tasks");
-  const data = await res.json();
+  const data = await res.json(); // Convert to JS object for use
+  // Newest tasks first
   return data.slice().reverse();
 };
 
 /**
  * Create a new task
  * @param taskData - Task data including title, description, status, and tags
- * @param token - JWT authentication token
  * @returns Promise resolving to the created task
  */
 export const createTask = async (
-  taskData: Partial<Task> & { tags: Tag[] },
-  token: string
+  taskData: Partial<Task> & { tags: Tag[] }
 ): Promise<Task> => {
   const res = await fetch("http://localhost:3000/api/tasks", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include", // Include cookies in request
     body: JSON.stringify({
       title: taskData.title,
       description: taskData.description || null,
@@ -50,20 +46,18 @@ export const createTask = async (
  * Update an existing task
  * @param id - Task ID to update
  * @param taskData - Updated task data
- * @param token - JWT authentication token
  * @returns Promise resolving to the updated task
  */
 export const updateTask = async (
   id: string,
-  taskData: Partial<Task> & { tags: Tag[] },
-  token: string
+  taskData: Partial<Task> & { tags: Tag[] }
 ): Promise<Task> => {
   const res = await fetch(`http://localhost:3000/api/tasks/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include", // Include cookies in request
     body: JSON.stringify({
       title: taskData.title,
       description: taskData.description || null,
@@ -81,15 +75,12 @@ export const updateTask = async (
 /**
  * Delete a task
  * @param id - Task ID to delete
- * @param token - JWT authentication token
  * @returns Promise resolving when task is deleted
  */
-export const deleteTask = async (id: string, token: string): Promise<void> => {
+export const deleteTask = async (id: string): Promise<void> => {
   const res = await fetch(`${"http://localhost:3000/api/tasks"}/${id}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    credentials: "include", // Include cookies in request
   });
   if (!res.ok) throw new Error("Failed to delete task");
 };

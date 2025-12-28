@@ -3,7 +3,7 @@ export default function Footer() {
 
   return (
     <footer className="footer">
-      <div className="main-container footer__container">
+      <div className="content-container footer__container">
         <div className="footer__content">
           <div className="footer__copyright">
             © {currentYear} Task Tracker. All rights reserved.
